@@ -3,21 +3,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-//Types of vertices in each square
 public enum SquareVertexType
 {
-    TopLeft,
-    TopRight,
-    BottomRight,
-    BottomLeft,
-    TopCenter,
-    RightCenter,
-    BottomCenter,
-    LeftCenter
+    TopLeft         = 0,
+    TopCenter       = 1,
+    TopRight        = 2,
+    RightCenter     = 3,
+    BottomRight     = 4,
+    BottomCenter    = 5,
+    BottomLeft      = 6,
+    LeftCenter      = 7
 }
 
 //Utility Triangle class
-public class Triangle
+public struct Triangle
 {
     public int v1;
     public int v2;
@@ -26,26 +25,19 @@ public class Triangle
 
 public class SquareMeshConfig {
 
-
-
-   
     //The static lookup table
     private static SquareMeshConfig[] configMap;
 
-    //List of vertices
-    public List<SquareVertexType> vertices;
-    //Temp dictionary used to make adding triangles to a config less manual
-    Dictionary<SquareVertexType, int> vertexIndices;
+    //A 8-bit flag where the LSB denotes the top left corner and goes clockwise from there to the MSB
+    public byte VertexFlags { get; private set; }
+
     //List of triangles
     public List<Triangle> triangles;
 
-
     public SquareMeshConfig()
     {
-        vertices = new List<SquareVertexType>(6);
-        vertexIndices = new Dictionary<SquareVertexType, int>();
         triangles = new List<Triangle>();
-
+        VertexFlags = 0x00;
     }
 
     public static void InitConfigMap()
@@ -79,202 +71,202 @@ public class SquareMeshConfig {
         {
             case 1:
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.LeftCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.LeftCenter
                     );
                 break;
             case 2:
                 config.AddTriangle(
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.RightCenter
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.RightCenter
                     );
                 break;
             case 3:
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.RightCenter,
-                        SquareVertexType.LeftCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.RightCenter,
+                        (int)SquareVertexType.LeftCenter
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.RightCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.RightCenter
                     );
                 break;
             case 4:
                 config.AddTriangle(
-                        SquareVertexType.BottomCenter,
-                        SquareVertexType.RightCenter,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.BottomCenter,
+                        (int)SquareVertexType.RightCenter,
+                        (int)SquareVertexType.BottomRight
                     );
                 break;
             case 5:
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.RightCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.RightCenter
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.RightCenter,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.RightCenter,
+                        (int)SquareVertexType.BottomRight
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.BottomRight,
-                        SquareVertexType.BottomCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.BottomRight,
+                        (int)SquareVertexType.BottomCenter
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.BottomCenter,
-                        SquareVertexType.LeftCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.BottomCenter,
+                        (int)SquareVertexType.LeftCenter
                     );
                 break;
             case 6:
                 config.AddTriangle(
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.BottomRight,
-                        SquareVertexType.BottomCenter
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.BottomRight,
+                        (int)SquareVertexType.BottomCenter
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.BottomRight
                     );
                 break;
             case 7:
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.BottomRight,
-                        SquareVertexType.BottomCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.BottomRight,
+                        (int)SquareVertexType.BottomCenter
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.BottomCenter,
-                        SquareVertexType.LeftCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.BottomCenter,
+                        (int)SquareVertexType.LeftCenter
                     );  
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.BottomRight
                     );
                 break;
             case 8:
                 config.AddTriangle(
-                       SquareVertexType.LeftCenter,
-                       SquareVertexType.BottomCenter,
-                       SquareVertexType.BottomLeft
+                       (int)SquareVertexType.LeftCenter,
+                       (int)SquareVertexType.BottomCenter,
+                       (int)SquareVertexType.BottomLeft
                    );
                 break;
             case 9:
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.BottomCenter,
-                        SquareVertexType.BottomLeft
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.BottomCenter,
+                        (int)SquareVertexType.BottomLeft
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.BottomCenter
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.BottomCenter
                     );
                 break;
             case 10:
                 config.AddTriangle(
-                        SquareVertexType.LeftCenter,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.BottomLeft
+                        (int)SquareVertexType.LeftCenter,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.BottomLeft
                     );
                 config.AddTriangle(
-                        SquareVertexType.BottomLeft,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.TopRight
+                        (int)SquareVertexType.BottomLeft,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.TopRight
                     );
                 config.AddTriangle(
-                        SquareVertexType.BottomLeft,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.BottomCenter
+                        (int)SquareVertexType.BottomLeft,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.BottomCenter
                     );
                 config.AddTriangle(
-                        SquareVertexType.BottomCenter,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.RightCenter
+                        (int)SquareVertexType.BottomCenter,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.RightCenter
                     );
                 break;
             case 11:
                 config.AddTriangle(
-                        SquareVertexType.BottomLeft,
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopRight
+                        (int)SquareVertexType.BottomLeft,
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopRight
                     );
                 config.AddTriangle(
-                        SquareVertexType.BottomLeft,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.BottomCenter
+                        (int)SquareVertexType.BottomLeft,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.BottomCenter
                     );
                 config.AddTriangle(
-                        SquareVertexType.BottomCenter,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.RightCenter
+                        (int)SquareVertexType.BottomCenter,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.RightCenter
                     );
                 break;
             case 12:
                 config.AddTriangle(
-                        SquareVertexType.BottomLeft,
-                        SquareVertexType.LeftCenter,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.BottomLeft,
+                        (int)SquareVertexType.LeftCenter,
+                        (int)SquareVertexType.BottomRight
                     );
                 config.AddTriangle(
-                        SquareVertexType.LeftCenter,
-                        SquareVertexType.RightCenter,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.LeftCenter,
+                        (int)SquareVertexType.RightCenter,
+                        (int)SquareVertexType.BottomRight
                     );
                 break;
             case 13:
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.BottomRight,
-                        SquareVertexType.BottomLeft
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.BottomRight,
+                        (int)SquareVertexType.BottomLeft
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.BottomRight
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.RightCenter,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.RightCenter,
+                        (int)SquareVertexType.BottomRight
                     );
                 break;
             case 14:
                  config.AddTriangle(
-                        SquareVertexType.LeftCenter,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.BottomLeft
+                        (int)SquareVertexType.LeftCenter,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.BottomLeft
                     );
                 config.AddTriangle(
-                        SquareVertexType.BottomLeft,
-                        SquareVertexType.TopCenter,
-                        SquareVertexType.TopRight
+                        (int)SquareVertexType.BottomLeft,
+                        (int)SquareVertexType.TopCenter,
+                        (int)SquareVertexType.TopRight
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopRight,
-                        SquareVertexType.BottomRight,
-                        SquareVertexType.BottomLeft
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.BottomRight,
+                        (int)SquareVertexType.BottomLeft
                     );
                 break;
             case 15:
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.BottomRight,
-                        SquareVertexType.BottomLeft
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.BottomRight,
+                        (int)SquareVertexType.BottomLeft
                     );
                 config.AddTriangle(
-                        SquareVertexType.TopLeft,
-                        SquareVertexType.TopRight,
-                        SquareVertexType.BottomRight
+                        (int)SquareVertexType.TopLeft,
+                        (int)SquareVertexType.TopRight,
+                        (int)SquareVertexType.BottomRight
                     );
                 break;
              default: break;
@@ -284,56 +276,50 @@ public class SquareMeshConfig {
     }
 
 
-    public void AddTriangle(SquareVertexType _v1, SquareVertexType _v2, SquareVertexType _v3)
+    private void AddTriangle(int _v1, int _v2, int _v3)
     {
-        //Initial vertex indices
-        int v1_i = -1;
-        int v2_i = -1;
-        int v3_i = -1;
-
-        //Check id specifed vertex is already added to Config
-        bool v1Found = vertexIndices.TryGetValue(_v1, out v1_i);
-        bool v2Found = vertexIndices.TryGetValue(_v2, out v2_i);
-        bool v3Found = vertexIndices.TryGetValue(_v3, out v3_i);
-
-        //If any vertex is already added then use its index from the dictionary, else append it to the end of the vertices array and update that new index into the temp dictionary.
-
-        if ( !v1Found) 
+        Triangle newTri = new Triangle
         {
+            v1 = _v1,
+            v2 = _v2,
+            v3 = _v3
+        };
 
-            v1_i = vertices.Count;
-            vertices.Add(_v1);
-            vertexIndices.Add(_v1, v1_i);
+        addVertex(_v1);
+        addVertex(_v2);
+        addVertex(_v3);
+
+        triangles.Add(newTri);
+
+    }
+
+    private bool addVertex(int vertIndex)
+    {
+        byte mask = (byte)(0x01 << vertIndex);
+        if( (mask & VertexFlags) == 0)
+        {
+            VertexFlags |= mask;
+            return true;
         }
 
-        if ( !v2Found)
+        return false;
+    }
+
+    public bool isVertex(int vertIndex)
+    {
+        byte mask = (byte)(0x01 << vertIndex);
+        if ((mask & VertexFlags) == 0)
         {
-            v2_i = vertices.Count;
-            vertices.Add(_v2);
-            vertexIndices.Add(_v2, v2_i);
+            return false;
         }
 
-        if ( !v3Found)
-        {
-            v3_i = vertices.Count;
-            vertices.Add(_v3);
-            vertexIndices.Add(_v3, v3_i);
-        }
-        
-        triangles.Add(new Triangle{
-            v1 = v1_i,
-            v2 = v2_i,
-            v3 = v3_i
-        });
+        return true;
     }
 
     public override string ToString()
     {
         string toRet = "{ vertices: [\n";
-        foreach (SquareVertexType vert in vertices)
-        {
-            toRet += vert.ToString() + ",\n";
-        }
+        toRet += Convert.ToString(VertexFlags,2).PadLeft(8, '0');
         toRet += "] , triangles : [ \n";
         foreach (Triangle tri in triangles)
         {
