@@ -9,6 +9,10 @@ public struct Square
     public float BtmLeftSample { get; private set; }
     public float BtmRightSample { get; private set; }
 
+    //X & Y indices
+    public int X { get; private set; }
+    public int Y { get; private set; }
+
     //Corner positions
     public Vector2 TopLeftPos { get; private set; }
     public Vector2 TopRightPos { get; private set; }
@@ -57,6 +61,8 @@ public struct Square
 
     public Square(int x, int y, VoxelSampleManager map)
     {
+        this.X = x;
+        this.Y = y;
 
         float[,] grid = map.voxelSamples;
         int width = grid.GetLength(1);
