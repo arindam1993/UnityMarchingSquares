@@ -23,8 +23,8 @@ public class VoxelSampleManager : MonoBehaviour {
 
     public bool DebugDraw;
 
-    private int numVoxelsX;
-    private int numVoxelsY;
+    public static int NumVoxelsX;
+    public static int NumVoxelsY;
     public List<CircularSampleable> sampleableElements;
 
 
@@ -36,10 +36,10 @@ public class VoxelSampleManager : MonoBehaviour {
 
     void Awake()
     {
-        numVoxelsX = Mathf.CeilToInt(width / voxelSize);
-        numVoxelsY = Mathf.CeilToInt(height / voxelSize);
+        NumVoxelsX = Mathf.CeilToInt(width / voxelSize);
+        NumVoxelsY = Mathf.CeilToInt(height / voxelSize);
 
-        voxelSamples = new float[numVoxelsY, numVoxelsX];
+        voxelSamples = new float[NumVoxelsY, NumVoxelsX];
 
         _mf = gameObject.AddComponent<MeshFilter>();
         _mr = gameObject.AddComponent<MeshRenderer>();
@@ -64,9 +64,9 @@ public class VoxelSampleManager : MonoBehaviour {
 
     void _debugDrawVoxels()
     {
-        for (int y = 0; y < numVoxelsY; y++)
+        for (int y = 0; y < NumVoxelsY; y++)
         {
-            for (int x = 0; x < numVoxelsX; x++)
+            for (int x = 0; x < NumVoxelsX; x++)
             {
                 Vector3 center = GetVoxelCenter(x,y);
                 Vector3 size = new Vector3(voxelSize *0.5f , voxelSize*0.5f, voxelSize*0.5f);
@@ -82,24 +82,23 @@ public class VoxelSampleManager : MonoBehaviour {
 
     void _debugDrawSquares()
     {
-        for (int y = 0; y < numVoxelsY - 1 ; y++)
+        for (int y = 0; y < NumVoxelsY - 1 ; y++)
         {
-            for (int x = 0; x < numVoxelsX - 1; x++)
+            for (int x = 0; x < NumVoxelsX - 1; x++)
             {
                 Vector3 center = GetVoxelCenter(x, y);
                 new Square(x, y, this).DebugDraw();
-
-
             }
+
         }
     }
 
 
     void _debugDrawSamples()
     {
-        for (int y = 0; y < numVoxelsY; y++)
+        for (int y = 0; y < NumVoxelsY; y++)
         {
-            for (int x = 0; x < numVoxelsX; x++)
+            for (int x = 0; x < NumVoxelsX; x++)
             {
                 Vector3 center = GetVoxelCenter(x, y);
                 center.y *= -1;
@@ -147,9 +146,9 @@ public class VoxelSampleManager : MonoBehaviour {
 
     void SampleVoxels()
     {
-        for (int y = 0; y < numVoxelsY; y++)
+        for (int y = 0; y < NumVoxelsY; y++)
         {
-            for (int x = 0; x < numVoxelsX; x++)
+            for (int x = 0; x < NumVoxelsX; x++)
             {
                 float total = 0f;
                 foreach (CircularSampleable _circle in sampleableElements)
@@ -173,13 +172,14 @@ public class VoxelSampleManager : MonoBehaviour {
 
         _meshGen.Reset();
 
-        for (int y = 0; y < numVoxelsY - 1; y++)
+        for (int y = 0; y < NumVoxelsY - 1; y++)
         {
-            for (int x = 0; x < numVoxelsX - 1; x++)
+            for (int x = 0; x < NumVoxelsX - 1; x++)
             {
                 Square sq = new Square(x, y, this);
                 _meshGen.AddSquareToMesh(sq, threshold);
             }
+            _meshGen.StartNewRow();
         }
         _meshGen.Generate(_mf);
     }

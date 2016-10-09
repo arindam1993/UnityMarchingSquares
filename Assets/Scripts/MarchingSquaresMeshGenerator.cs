@@ -16,14 +16,18 @@ public class MarchingSquaresMeshGenerator  {
     int triCount = 0;
 
     //Temporary vertex index map
-    int[] _tmpVertices;
+    int[] _currVertIndices;
+
+
+    private VertexIndexCache vertCache;
 
     public MarchingSquaresMeshGenerator(){
         _generatedMesh = new Mesh();
         vertices = new Vector3[5000];
         triangles = new int[3*5000];
-        _tmpVertices = new int[8];
+        _currVertIndices = new int[8];
 
+        vertCache = new VertexIndexCache();
         Reset();
     }
 
@@ -43,6 +47,8 @@ public class MarchingSquaresMeshGenerator  {
         _generatedMesh.vertices = vertices;
         _generatedMesh.triangles = triangles;
         mf.mesh = _generatedMesh;
+
+        vertCache.EndOfFrame();
     }
 
     //Add a square to the mesh, this method looks up the configuration and calls the utility parser function
@@ -76,15 +82,16 @@ public class MarchingSquaresMeshGenerator  {
     private void parseConfig(Square square, SquareMeshConfig sqConfig, float threshold)
     {
 
-        Array.Clear(_tmpVertices, 0, 8);
-
+        Array.Clear(_currVertIndices, 0, 8);
+        byte cachedVertMask = vertCache.TryGetCachedIndices(square.X, sqConfig, _currVertIndices);
         //Since each SquareMeshConfig contains vertex indices for each square in isolation, we use the current vertex count to offset the indices.
-        int vertIndex = 0;
-        int initVertOffset = vertexCount;
+
         for (int vert_i = 0; vert_i < 8; vert_i++)
         {
 
-            if (sqConfig.isVertex(vert_i))
+            bool isVertCached = ((0x01 << vert_i) & cachedVertMask) > 0;
+            
+            if (sqConfig.isVertex(vert_i) && !isVertCached)
             {
                 SquareVertexType sqVert = (SquareVertexType)vert_i;
 
@@ -120,10 +127,11 @@ public class MarchingSquaresMeshGenerator  {
                     default: break;
                 }
 
+                _currVertIndices[vert_i] = vertexCount;
                 addVertex(vertPos);
 
-                _tmpVertices[vert_i] = vertIndex;
-                vertIndex++;
+
+                vertCache.SetIndicesAt(square.X, _currVertIndices);
             }
 
         }
@@ -135,10 +143,15 @@ public class MarchingSquaresMeshGenerator  {
             Triangle sqTri = sqTris[tri_i];
 
             addTriangle(
-                    initVertOffset + _tmpVertices[sqTri.v1],
-                    initVertOffset + _tmpVertices[sqTri.v2],
-                    initVertOffset + _tmpVertices[sqTri.v3]
+                    _currVertIndices[sqTri.v1],
+                    _currVertIndices[sqTri.v2],
+                    _currVertIndices[sqTri.v3]
                 );
         }
+    }
+
+    public void StartNewRow() {
+
+        vertCache.StartNewRow();
     }
 }
