@@ -26,12 +26,14 @@ public class VoxelSampleManager : MonoBehaviour {
     public static int NumVoxelsX;
     public static int NumVoxelsY;
     public List<CircularSampleable> sampleableElements;
-
+    private Vector2[] samples;
 
     MeshFilter _mf;
     MeshRenderer _mr;
 
     MarchingSquaresMeshGenerator _meshGen;
+
+    ParallelHelper _parallelSampler;
     
 
     void Awake()
@@ -46,7 +48,11 @@ public class VoxelSampleManager : MonoBehaviour {
 
         _mr.material = material;
 
+        samples = new Vector2[sampleableElements.Count];
+
         _meshGen = new MarchingSquaresMeshGenerator();
+
+        _parallelSampler = new ParallelHelper(4);
     }
 
     void Start()
@@ -146,24 +152,36 @@ public class VoxelSampleManager : MonoBehaviour {
 
     void SampleVoxels()
     {
-        for (int y = 0; y < NumVoxelsY; y++)
+        int sampleIndex = 0;
+        foreach (CircularSampleable _circle in sampleableElements)
+        {
+            Vector2 sample = _circle.transform.position;
+
+            samples[sampleIndex] = sample;
+            sampleIndex++;
+
+        }
+        _parallelSampler.For(0, NumVoxelsY, 1, (y) =>
         {
             for (int x = 0; x < NumVoxelsX; x++)
             {
+                
                 float total = 0f;
-                foreach (CircularSampleable _circle in sampleableElements)
+                for( int i = 0; i < samples.Length; i++)
                 {
-                    float sample = _circle.GetSampleAt(GetVoxelCenter(x, y));
-                    
-                    //if( sample >= threshold)    
-                        total += sample;
-                                      
+                    Vector2 vox = GetVoxelCenter(x, y);
+                    Vector2 samp = samples[i];
+                    total += sampleableElements[0].GetSampleAt(vox, samp);
                 }
                 //total = sampleableElements.Count;
                 voxelSamples[y, x] = total;
 
             }
-        }
+        });
+        //for (int y = 0; y < NumVoxelsY; y++)
+        //{
+            
+       // }
     }
 
 
@@ -189,6 +207,7 @@ public class VoxelSampleManager : MonoBehaviour {
 
         SampleVoxels();
         GenerateMesh();
+        //Debug.Break();
         // _debugDrawSquares();
 	}
 }

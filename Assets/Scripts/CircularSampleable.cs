@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CircularSampleable : MonoBehaviour, IVoxelGridSampleable {
+public class CircularSampleable : MonoBehaviour {
 
     public float radius;
 
@@ -71,13 +71,13 @@ public class CircularSampleable : MonoBehaviour, IVoxelGridSampleable {
         _rbd2d.velocity = reflVel;
     }
 
-    public float GetSampleAt(Vector2 voxelCenter)
+    public float GetSampleAt(Vector2 voxelCenter, Vector2 center)
     {
         float vx = voxelCenter.x;
         float vy = voxelCenter.y;
 
-        float cx = transform.position.x;
-        float cy = transform.position.y;
+        float cx = center.x;
+        float cy = center.y;
         return (radius * radius) / ((vx - cx) * (vx - cx ) + (vy - cy ) * (vy  - cy )) ;
     }
 }
