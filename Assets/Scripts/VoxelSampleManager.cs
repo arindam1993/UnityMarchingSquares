@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Diagnostics;
 
 public class VoxelSampleManager : MonoBehaviour {
     
@@ -34,13 +35,17 @@ public class VoxelSampleManager : MonoBehaviour {
     MarchingSquaresMeshGenerator _meshGen;
 
     ParallelHelper _parallelSampler;
-    
 
+
+
+    int runCtr;
+    Stopwatch timePerSample;
+    long totalTime;
     void Awake()
     {
         NumVoxelsX = Mathf.CeilToInt(width / voxelSize);
         NumVoxelsY = Mathf.CeilToInt(height / voxelSize);
-
+        UnityEngine.Debug.Log(NumVoxelsY);
         voxelSamples = new float[NumVoxelsY, NumVoxelsX];
 
         _mf = gameObject.AddComponent<MeshFilter>();
@@ -52,7 +57,11 @@ public class VoxelSampleManager : MonoBehaviour {
 
         _meshGen = new MarchingSquaresMeshGenerator();
 
-        _parallelSampler = new ParallelHelper(4);
+        _parallelSampler = new ParallelHelper(1);
+
+        runCtr = 0;
+        timePerSample = new Stopwatch();
+        totalTime = 0;
     }
 
     void Start()
@@ -152,6 +161,8 @@ public class VoxelSampleManager : MonoBehaviour {
 
     void SampleVoxels()
     {
+        timePerSample.Reset();
+        timePerSample.Start();
         int sampleIndex = 0;
         foreach (CircularSampleable _circle in sampleableElements)
         {
@@ -178,6 +189,14 @@ public class VoxelSampleManager : MonoBehaviour {
 
             }
         });
+        timePerSample.Stop();
+        totalTime += timePerSample.ElapsedMilliseconds;
+        runCtr++;
+
+        if ( runCtr == 10000)
+        {
+            UnityEngine.Debug.Log("TimeTaken :" + totalTime);
+        }
         //for (int y = 0; y < NumVoxelsY; y++)
         //{
             
