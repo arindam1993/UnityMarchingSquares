@@ -23,7 +23,9 @@ public class VertexIndexCache
 
     public void StartNewRow()
     {
-        Array.Copy(currRowCache, prevRowCache, currRowCache.Length);
+        int[,] temp = prevRowCache;
+        prevRowCache = currRowCache;
+        currRowCache = temp;
         initCache(currRowCache);
         firstRowCached = true;
 
@@ -37,13 +39,14 @@ public class VertexIndexCache
     private void initCache(int[,] row)
     {
 
-        for( int x=0; x < row.GetLength(0); x++)
-        {
-            for (int y= 0; y < row.GetLength(1); y++)
-            {
-                row[x, y] = -1;
-            }
-        }
+        //for( int x=0; x < row.GetLength(0); x++)
+        //{
+        //    for (int y= 0; y < row.GetLength(1); y++)
+        //    {
+        //        row[x, y] = -1;
+        //    }
+        //}
+        Array.Clear(row, 0, row.Length);
     }
 
     public void SetIndicesAt(int sqX, int[] indices)
@@ -51,7 +54,7 @@ public class VertexIndexCache
         int startindex = sqX;
         for( int i=0; i < 8; i++)
         {
-            currRowCache[sqX, i] = indices[i];
+            currRowCache[sqX, i] = indices[i] + 1;
         }
     }
 
@@ -70,7 +73,7 @@ public class VertexIndexCache
             if (sqCfg.isVertex(0))
             {
 
-                int index = prevRowCache[sqX, 6];
+                int index = prevRowCache[sqX, 6] - 1;
 
                 if (index != -1)
                 {
@@ -84,7 +87,7 @@ public class VertexIndexCache
             if (sqCfg.isVertex(1))
             {
 
-                int index = prevRowCache[sqX, 5];
+                int index = prevRowCache[sqX, 5] - 1;
 
                 if (index != -1)
                 {
@@ -98,7 +101,7 @@ public class VertexIndexCache
             if (sqCfg.isVertex(2))
             {
 
-                int index = prevRowCache[sqX, 4];
+                int index = prevRowCache[sqX, 4] - 1;
 
                 if (index != -1)
                 {
@@ -117,7 +120,7 @@ public class VertexIndexCache
             if (sqCfg.isVertex(6))
             {
 
-                int index = currRowCache[sqX - 1, 4];
+                int index = currRowCache[sqX - 1, 4] - 1;
 
                 if (index != -1)
                 {
@@ -132,7 +135,7 @@ public class VertexIndexCache
             if (sqCfg.isVertex(7))
             {
 
-                int index = currRowCache[sqX - 1, 3];
+                int index = currRowCache[sqX - 1, 3] - 1;
 
                 if (index != -1)
                 {

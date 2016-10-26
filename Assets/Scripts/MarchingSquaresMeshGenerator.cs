@@ -23,8 +23,8 @@ public class MarchingSquaresMeshGenerator  {
 
     public MarchingSquaresMeshGenerator(){
         _generatedMesh = new Mesh();
-        vertices = new Vector3[5000];
-        triangles = new int[3*5000];
+        vertices = new Vector3[VoxelSampleManager.NumVoxelsY * 100 / VoxelSampleManager.NUM_THREADS];
+        triangles = new int[3* VoxelSampleManager.NumVoxelsY * 100 / VoxelSampleManager.NUM_THREADS];
         _currVertIndices = new int[8];
 
         vertCache = new VertexIndexCache();

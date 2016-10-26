@@ -6,6 +6,8 @@ using System.Diagnostics;
 
 public class VoxelSampleManager : MonoBehaviour {
     
+    public static int NUM_THREADS = 2;
+
     //Dimensions of the world
     public static float width   = 15f;
     public static float height  = 8f;
@@ -27,12 +29,14 @@ public class VoxelSampleManager : MonoBehaviour {
     public static int NumVoxelsX;
     public static int NumVoxelsY;
     public List<CircularSampleable> sampleableElements;
-    private Vector2[] samples;
+    private Vector2[] _sampleableCenters;
 
-    MeshFilter _mf;
-    MeshRenderer _mr;
+    MeshFilter[] _mf;
+    MeshRenderer[] _mr;
 
-    MarchingSquaresMeshGenerator _meshGen;
+    MarchingSquaresMeshGenerator[] _meshGen;
+    ParallelHelper _parallelMeshGenerator;
+
 
     ParallelHelper _parallelSampler;
 
@@ -46,18 +50,17 @@ public class VoxelSampleManager : MonoBehaviour {
         NumVoxelsX = Mathf.CeilToInt(width / voxelSize);
         NumVoxelsY = Mathf.CeilToInt(height / voxelSize);
         UnityEngine.Debug.Log(NumVoxelsY);
+
+
+        initMeshGeneration();
+
+
+
+
+
         voxelSamples = new float[NumVoxelsY, NumVoxelsX];
-
-        _mf = gameObject.AddComponent<MeshFilter>();
-        _mr = gameObject.AddComponent<MeshRenderer>();
-
-        _mr.material = material;
-
-        samples = new Vector2[sampleableElements.Count];
-
-        _meshGen = new MarchingSquaresMeshGenerator();
-
-        _parallelSampler = new ParallelHelper(1);
+        _sampleableCenters = new Vector2[sampleableElements.Count];
+        _parallelSampler = new ParallelHelper(NUM_THREADS);
 
         runCtr = 0;
         timePerSample = new Stopwatch();
@@ -75,7 +78,28 @@ public class VoxelSampleManager : MonoBehaviour {
 
     }
 
+    void initMeshGeneration()
+    {
+        _mf = new MeshFilter[NUM_THREADS];
+        _mr = new MeshRenderer[NUM_THREADS];
+        _meshGen = new MarchingSquaresMeshGenerator[NUM_THREADS];
+        _parallelMeshGenerator = new ParallelHelper(NUM_THREADS);
 
+        for(int childIndex = 0; childIndex < NUM_THREADS; childIndex++)
+        {
+            GameObject child = new GameObject("MeshChild" + childIndex);
+            child.transform.parent = this.transform;
+            child.transform.localPosition = Vector3.zero;
+
+            _mf[childIndex] = child.AddComponent<MeshFilter>();
+            _mr[childIndex] = child.AddComponent<MeshRenderer>();
+            _mr[childIndex].sharedMaterial = material;
+
+            _meshGen[childIndex] = new MarchingSquaresMeshGenerator();
+
+        }
+
+    }
 
     void _debugDrawVoxels()
     {
@@ -161,72 +185,80 @@ public class VoxelSampleManager : MonoBehaviour {
 
     void SampleVoxels()
     {
-        timePerSample.Reset();
-        timePerSample.Start();
+       
+
         int sampleIndex = 0;
+
         foreach (CircularSampleable _circle in sampleableElements)
         {
             Vector2 sample = _circle.transform.position;
 
-            samples[sampleIndex] = sample;
+            _sampleableCenters[sampleIndex] = sample;
             sampleIndex++;
 
         }
-        _parallelSampler.For(0, NumVoxelsY, 1, (y) =>
+
+        _parallelSampler.For(0, NumVoxelsY, 1, (y, threadIndex) =>
         {
             for (int x = 0; x < NumVoxelsX; x++)
             {
                 
                 float total = 0f;
-                for( int i = 0; i < samples.Length; i++)
+                for( int i = 0; i < _sampleableCenters.Length; i++)
                 {
                     Vector2 vox = GetVoxelCenter(x, y);
-                    Vector2 samp = samples[i];
+                    Vector2 samp = _sampleableCenters[i];
                     total += sampleableElements[0].GetSampleAt(vox, samp);
                 }
-                //total = sampleableElements.Count;
                 voxelSamples[y, x] = total;
 
             }
-        });
-        timePerSample.Stop();
-        totalTime += timePerSample.ElapsedMilliseconds;
-        runCtr++;
+        },null);
 
-        if ( runCtr == 10000)
-        {
-            UnityEngine.Debug.Log("TimeTaken :" + totalTime);
-        }
-        //for (int y = 0; y < NumVoxelsY; y++)
-        //{
-            
-       // }
+      
     }
 
 
     void GenerateMesh()
     {
-
-        _meshGen.Reset();
-
-        for (int y = 0; y < NumVoxelsY - 1; y++)
+        timePerSample.Reset();
+        timePerSample.Start();
+        for (int genIndex = 0; genIndex < NUM_THREADS; genIndex++)
         {
-            for (int x = 0; x < NumVoxelsX - 1; x++)
-            {
-                Square sq = new Square(x, y, this);
-                _meshGen.AddSquareToMesh(sq, threshold);
-            }
-            _meshGen.StartNewRow();
+            _meshGen[genIndex].Reset();
         }
-        _meshGen.Generate(_mf);
+
+        _parallelMeshGenerator.For(0, NumVoxelsY - 1, 1, (y, threadIndex) =>
+            {
+                for (int x = 0; x < NumVoxelsX - 1; x++)
+                {
+                    Square sq = new Square(x, y, this);
+                    _meshGen[threadIndex].AddSquareToMesh(sq, threshold);
+                }
+                _meshGen[threadIndex].StartNewRow();
+            },null);
+
+        for (int genIndex = 0; genIndex < NUM_THREADS; genIndex++)
+        {
+            _meshGen[genIndex].Generate(_mf[genIndex]);
+        }
+        timePerSample.Stop();
+        totalTime += timePerSample.ElapsedMilliseconds;
+        runCtr++;
     }
 
 	// Update is called once per frame
 	void Update () {
-
+        
         SampleVoxels();
         GenerateMesh();
+    
+
+        if (runCtr == 10000)
+        {
+            UnityEngine.Debug.Log("TimeTaken :" + totalTime);
+        }
         //Debug.Break();
         // _debugDrawSquares();
-	}
+    }
 }

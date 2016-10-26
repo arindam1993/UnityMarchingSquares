@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Threading;
 
-public delegate void ParallelForDelegate(int currIndex);
+public delegate void ParallelForDelegate(int currIndex, int threadIndex);
+public delegate void OnForFinishedDelegate(int threadIndex);
 
 public class ParallelHelper  {
 
@@ -11,12 +12,14 @@ public class ParallelHelper  {
     private Thread[] threadPool;
 
     private ParallelForDelegate forDelegate;
+    private OnForFinishedDelegate onFinish;
 
     struct ThreadIndexData
     {
         public int Low;
         public int High;
         public int Step;
+        public int ThreadIndex;
     }
 
     public ParallelHelper(int threadCount)
@@ -32,9 +35,10 @@ public class ParallelHelper  {
         }
     }
 
-    public void For(int start, int end, int step, ParallelForDelegate del)
+    public void For(int start, int end, int step, ParallelForDelegate del, OnForFinishedDelegate fin)
     {
         this.forDelegate = del;
+        this.onFinish = fin;
 
         int rem = (end - start) % this.ThreadCount;
         int perThread = (end - start) / this.ThreadCount;
@@ -52,7 +56,8 @@ public class ParallelHelper  {
             {
                 Low = forStart,
                 High = forEnd,
-                Step = step
+                Step = step,
+                ThreadIndex = threadIndex
             };
             this.threadPool[threadIndex] = new Thread(
                     new ParameterizedThreadStart(threadTask)
@@ -77,10 +82,13 @@ public class ParallelHelper  {
         int low = indices.Low;
         int high = indices.High;
         int step = indices.Step;
-            
+        int threadIndex = indices.ThreadIndex;    
         for( int currIndex=low; currIndex < high; currIndex += step)
         {
-            forDelegate(currIndex);
+            forDelegate(currIndex, threadIndex);
         }
+
+        if( this.onFinish != null)
+            this.onFinish(threadIndex);
     }
 }
