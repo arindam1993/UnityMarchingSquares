@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 public class VoxelSampleManager : MonoBehaviour {
     
-    public static int NUM_THREADS = 2;
+    public static int NUM_THREADS = 4;
 
     //Dimensions of the world
     public static float width   = 15f;
